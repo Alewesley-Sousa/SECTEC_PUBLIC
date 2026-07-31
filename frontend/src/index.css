@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --sectec-50: #f0fdf4;
+  --sectec-100: #dcfce7;
+  --sectec-500: #22c55e;
+  --sectec-600: #16a34a;
+  --sectec-700: #15803d;
+  --sectec-900: #14532d;
+}
+
+@theme inline {
+  --color-sectec-50: var(--sectec-50);
+  --color-sectec-100: var(--sectec-100);
+  --color-sectec-500: var(--sectec-500);
+  --color-sectec-600: var(--sectec-600);
+  --color-sectec-700: var(--sectec-700);
+  --color-sectec-900: var(--sectec-900);
+}
+body {
+  font-family: "Poppins", sans-serif;
+}
