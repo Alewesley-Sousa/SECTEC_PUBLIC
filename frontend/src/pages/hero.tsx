@@ -6,7 +6,14 @@ import imagemEstudo from "../assets/study.jpg";
 import imagemPoster from "../assets/post.jpg";
 import { TiltCard } from "../components/TiltCard";
 
-export function Hero() {
+interface HeroProps {
+  busca: string;
+  onBuscaChange: (valor: string) => void;
+  curso: string;
+  onCursoChange: (valor: string) => void;
+}
+
+export function Hero({ busca, onBuscaChange, curso, onCursoChange }: HeroProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -16,7 +23,6 @@ export function Hero() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Trava o scroll do body enquanto o drawer está aberto
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
@@ -55,7 +61,7 @@ export function Hero() {
         </div>
       </header>
 
-      {/* Menu mobile — drawer da direita, fora do header pra não herdar o stacking context dele */}
+      {/* Menu mobile */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -111,7 +117,6 @@ export function Hero() {
 
       {/* Hero content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 sm:pb-24 grid md:grid-cols-[1.05fr_0.95fr] gap-8 sm:gap-10 items-center">
-        {/* Texto */}
         <div className="order-1 relative">
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
@@ -164,7 +169,6 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Composição de imagens estilo "moldura" */}
         <div className="order-2 relative hidden md:block h-[420px]">
           <motion.div
             animate={{ rotate: 360 }}
@@ -226,9 +230,9 @@ export function Hero() {
       >
         <div className="bg-white rounded-xl shadow-[0_20px_45px_-15px_rgba(34,197,94,0.35)] hover:shadow-[0_25px_55px_-15px_rgba(34,197,94,0.45)] transition-shadow duration-300 border border-slate-200 p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <FiltroSelect label="Evento" placeholder="Todos os eventos" />
-          <FiltroSelect label="Curso" placeholder="Todos os cursos" />
+          <FiltroCurso value={curso} onChange={onCursoChange} />
           <FiltroSelect label="Eixo temático" placeholder="Todos os eixos temáticos" />
-          <FiltroBusca />
+          <FiltroBusca value={busca} onChange={onBuscaChange} />
         </div>
       </motion.div>
     </section>
@@ -286,8 +290,46 @@ function FiltroSelect({ label, placeholder }: { label: string; placeholder: stri
     </div>
   );
 }
+{/* nao funcional*/}
+const OPCOES_CURSO = [
+  { value: "", label: "Todos os cursos" },
+  { value: "informatica", label: "Informática" },
+  { value: "enfermagem", label: "Enfermagem" },
+  { value: "contabilidade", label: "Contabilidade" },
+];
 
-function FiltroBusca() {
+function FiltroCurso({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (valor: string) => void;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-slate-500 mb-1.5">Curso</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-sectec-600 focus:ring-2 focus:ring-sectec-100 transition-all"
+      >
+        {OPCOES_CURSO.map((opcao) => (
+          <option key={opcao.value} value={opcao.value}>
+            {opcao.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function FiltroBusca({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (valor: string) => void;
+}) {
   return (
     <div>
       <label className="block text-xs font-medium text-slate-500 mb-1.5">
@@ -308,6 +350,8 @@ function FiltroBusca() {
         </svg>
         <input
           type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           placeholder="Digite o nome do projeto ou aluno..."
           className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-sectec-600 focus:ring-2 focus:ring-sectec-100 transition-all"
         />

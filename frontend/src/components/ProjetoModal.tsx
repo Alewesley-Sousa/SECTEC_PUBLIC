@@ -1,11 +1,12 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Play, Users, Tag, ZoomIn, ZoomOut, RotateCcw, Image as ImageIcon } from "lucide-react";
-import type { Projeto } from "../types/projeto";
+import type { ProjetoPublico } from "../api/projetosPublicos";
+import { getBannerUrl } from "../api/banner";
 import { BannerFlip } from "./BannerFlip";
 
 interface ProjetoModalProps {
-  projeto: Projeto;
+  projeto: ProjetoPublico;
   onClose: () => void;
 }
 
@@ -17,6 +18,8 @@ type Aba = "banner" | "video";
 export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
   const [bannerExpandido, setBannerExpandido] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState<Aba>("banner");
+
+  const bannerUrl = projeto.hasBanner ? getBannerUrl(projeto.id) : undefined;
 
   return (
     <motion.div
@@ -42,13 +45,13 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
           <X size={20} />
         </button>
 
-        {/* DESKTOP (md+): layout lado a lado, como era antes */}
+        {/* DESKTOP (md+) */}
         <div className="hidden md:grid p-6 pt-10 grid-cols-2 gap-8">
           <div className="flex flex-col gap-5 order-1">
             <div>
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-sectec-50 text-sectec-700 text-xs font-semibold mb-2">
                 <Tag size={12} />
-                {projeto.eixoTematico}
+                {projeto.tema.nome}
               </span>
               <h2 className="text-xl font-bold text-slate-900">{projeto.titulo}</h2>
             </div>
@@ -61,12 +64,17 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
                 EQUIPE
               </p>
               <div className="flex flex-wrap gap-2">
-                {projeto.equipe.map((nome) => (
+                {projeto.equipe.map((membro) => (
                   <span
-                    key={nome}
-                    className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs"
+                    key={membro.id}
+                    className={`px-3 py-1 rounded-full text-xs ${
+                      membro.role === "autor"
+                        ? "bg-sectec-100 text-sectec-800 font-semibold"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
                   >
-                    {nome}
+                    {membro.nome}
+                    {membro.role === "autor" && " ★"}
                   </span>
                 ))}
               </div>
@@ -77,7 +85,7 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
               <div className="h-40 rounded-xl bg-slate-100 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 text-slate-400">
                 <Play size={26} />
                 <span className="text-xs font-medium">
-                  {projeto.videoUrl ? "Vídeo disponível" : "Sem vídeo cadastrado"}
+                  {projeto.video ? "Vídeo disponível" : "Sem vídeo cadastrado"}
                 </span>
               </div>
             </div>
@@ -85,19 +93,19 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
 
           <div className="order-2">
             <BannerFlip
-              bannerUrl={projeto.bannerUrl}
+              bannerUrl={bannerUrl}
               titulo={projeto.titulo}
               onExpandir={() => setBannerExpandido(true)}
             />
           </div>
         </div>
 
-        {/* MOBILE (abaixo de md): infos em cima, banner/vídeo em abas embaixo */}
+        {/* MOBILE (abaixo de md) */}
         <div className="md:hidden p-5 pt-10 flex flex-col gap-6">
           <div>
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-sectec-50 text-sectec-700 text-xs font-semibold mb-2">
               <Tag size={12} />
-              {projeto.eixoTematico}
+              {projeto.tema.nome}
             </span>
             <h2 className="text-lg font-bold text-slate-900">{projeto.titulo}</h2>
             <p className="mt-3 text-sm text-slate-600 leading-relaxed">
@@ -111,18 +119,22 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
               EQUIPE
             </p>
             <div className="flex flex-wrap gap-2">
-              {projeto.equipe.map((nome) => (
+              {projeto.equipe.map((membro) => (
                 <span
-                  key={nome}
-                  className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs"
+                  key={membro.id}
+                  className={`px-3 py-1 rounded-full text-xs ${
+                    membro.role === "autor"
+                      ? "bg-sectec-100 text-sectec-800 font-semibold"
+                      : "bg-slate-100 text-slate-700"
+                  }`}
                 >
-                  {nome}
+                  {membro.nome}
+                  {membro.role === "autor" && " ★"}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* Abas: Banner / Vídeo */}
           <div>
             <div className="flex items-center gap-1 border-b border-slate-200 mb-4">
               <TabButton
@@ -149,7 +161,7 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
                   transition={{ duration: 0.15 }}
                 >
                   <BannerFlip
-                    bannerUrl={projeto.bannerUrl}
+                    bannerUrl={bannerUrl}
                     titulo={projeto.titulo}
                     onExpandir={() => setBannerExpandido(true)}
                   />
@@ -165,7 +177,7 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
                 >
                   <Play size={32} />
                   <span className="text-xs font-medium">
-                    {projeto.videoUrl ? "Vídeo disponível" : "Sem vídeo cadastrado"}
+                    {projeto.video ? "Vídeo disponível" : "Sem vídeo cadastrado"}
                   </span>
                 </motion.div>
               )}
@@ -175,9 +187,9 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
       </motion.div>
 
       <AnimatePresence>
-        {bannerExpandido && (
+        {bannerExpandido && bannerUrl && (
           <ZoomableLightbox
-            bannerUrl={projeto.bannerUrl}
+            bannerUrl={bannerUrl}
             titulo={projeto.titulo}
             onClose={() => setBannerExpandido(false)}
           />
@@ -241,8 +253,7 @@ function ZoomableLightbox({ bannerUrl, titulo, onClose }: ZoomableLightboxProps)
   const clampScale = (s: number) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, s));
 
   const clampPosition = useCallback((x: number, y: number, s: number) => {
-    // Limita o pan pra não deixar a imagem "sumir" da tela
-    const maxOffset = (s - 1) * 220; // aproximação segura baseada no tamanho do container
+    const maxOffset = (s - 1) * 220;
     return {
       x: Math.min(maxOffset, Math.max(-maxOffset, x)),
       y: Math.min(maxOffset, Math.max(-maxOffset, y)),
@@ -266,7 +277,6 @@ function ZoomableLightbox({ bannerUrl, titulo, onClose }: ZoomableLightboxProps)
     zoomTo(scale > 1 ? 1 : 2.5);
   };
 
-  // --- Mouse drag (desktop) ---
   const handleMouseDown = (e: React.MouseEvent) => {
     if (scale === 1) return;
     setIsDragging(true);
@@ -284,7 +294,6 @@ function ZoomableLightbox({ bannerUrl, titulo, onClose }: ZoomableLightboxProps)
 
   const handleMouseUp = () => setIsDragging(false);
 
-  // --- Touch (celular): pan com 1 dedo, pinça com 2, duplo toque ---
   const getTouchDist = (touches: React.TouchList) => {
     const [t1, t2] = [touches[0], touches[1]];
     return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
@@ -339,7 +348,6 @@ function ZoomableLightbox({ bannerUrl, titulo, onClose }: ZoomableLightboxProps)
       }}
       className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4 overflow-hidden"
     >
-      {/* Imagem com zoom/pan */}
       <div
         className="w-full h-full flex items-center justify-center touch-none"
         onWheel={handleWheel}
@@ -351,15 +359,6 @@ function ZoomableLightbox({ bannerUrl, titulo, onClose }: ZoomableLightboxProps)
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/*
-          IMPORTANTE: este é um <img> normal, não <motion.img>.
-          O framer-motion assume o controle da propriedade CSS "transform"
-          em qualquer elemento motion.* que tenha a prop `animate`. Como
-          aqui o transform (translate + scale) é controlado manualmente
-          via `style`, o framer-motion ficava sobrescrevendo esse valor a
-          cada frame e forçando a imagem de volta pra escala 1 — por isso
-          o zoom "não fazia nada" mesmo com o estado mudando certinho.
-        */}
         <img
           src={bannerUrl}
           alt={`Banner completo do projeto ${titulo}`}
@@ -375,7 +374,6 @@ function ZoomableLightbox({ bannerUrl, titulo, onClose }: ZoomableLightboxProps)
         />
       </div>
 
-      {/* Controles de zoom — paleta verde/branco do site */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full px-2 py-2 shadow-lg border border-emerald-100"
