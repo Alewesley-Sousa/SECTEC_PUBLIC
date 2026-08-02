@@ -1,7 +1,11 @@
 import { Info } from "lucide-react";
 import SectecLogo from "./LogoSVG";
 
-export function Footer() {
+interface FooterProps {
+  onSobreClick: () => void;
+}
+
+export function Footer({ onSobreClick }: FooterProps) {
   const ano = new Date().getFullYear();
 
   return (
@@ -9,13 +13,14 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <SectecLogo className="h-9 w-auto" />
 
-        <a
-          href="#sobre"
+        <button
+          type="button"
+          onClick={onSobreClick}
           className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-sectec-600 transition-colors"
         >
           <Info size={16} />
           Sobre
-        </a>
+        </button>
 
         <p className="text-xs text-slate-400 whitespace-nowrap">
           © {ano} SECTEC — Projeto Escolar.

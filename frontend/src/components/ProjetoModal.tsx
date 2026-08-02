@@ -80,21 +80,15 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
               </div>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold text-slate-500 mb-2">VÍDEO DA EQUIPE</p>
-              <div className="h-40 rounded-xl bg-slate-100 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 text-slate-400">
-                <Play size={26} />
-                <span className="text-xs font-medium">
-                  {projeto.video ? "Vídeo disponível" : "Sem vídeo cadastrado"}
-                </span>
-              </div>
-            </div>
           </div>
 
           <div className="order-2">
-            <BannerFlip
+            <VisualizadorMidia
               bannerUrl={bannerUrl}
               titulo={projeto.titulo}
+              videoUrl={projeto.video}
+              abaAtiva={abaAtiva}
+              onAbaChange={setAbaAtiva}
               onExpandir={() => setBannerExpandido(true)}
             />
           </div>
@@ -135,54 +129,14 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center gap-1 border-b border-slate-200 mb-4">
-              <TabButton
-                active={abaAtiva === "banner"}
-                onClick={() => setAbaAtiva("banner")}
-                icon={<ImageIcon size={15} />}
-                label="Banner"
-              />
-              <TabButton
-                active={abaAtiva === "video"}
-                onClick={() => setAbaAtiva("video")}
-                icon={<Play size={15} />}
-                label="Vídeo da equipe"
-              />
-            </div>
-
-            <AnimatePresence mode="wait">
-              {abaAtiva === "banner" ? (
-                <motion.div
-                  key="banner"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <BannerFlip
-                    bannerUrl={bannerUrl}
-                    titulo={projeto.titulo}
-                    onExpandir={() => setBannerExpandido(true)}
-                  />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="video"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.15 }}
-                  className="h-64 sm:h-72 rounded-xl bg-slate-100 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 text-slate-400"
-                >
-                  <Play size={32} />
-                  <span className="text-xs font-medium">
-                    {projeto.video ? "Vídeo disponível" : "Sem vídeo cadastrado"}
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <VisualizadorMidia
+            bannerUrl={bannerUrl}
+            titulo={projeto.titulo}
+            videoUrl={projeto.video}
+            abaAtiva={abaAtiva}
+            onAbaChange={setAbaAtiva}
+            onExpandir={() => setBannerExpandido(true)}
+          />
         </div>
       </motion.div>
 
@@ -197,6 +151,145 @@ export function ProjetoModal({ projeto, onClose }: ProjetoModalProps) {
       </AnimatePresence>
     </motion.div>
   );
+}
+
+interface VisualizadorMidiaProps {
+  bannerUrl?: string;
+  titulo: string;
+  videoUrl: string | false | null;
+  abaAtiva: Aba;
+  onAbaChange: (aba: Aba) => void;
+  onExpandir: () => void;
+}
+
+function VisualizadorMidia({
+  bannerUrl,
+  titulo,
+  videoUrl,
+  abaAtiva,
+  onAbaChange,
+  onExpandir,
+}: VisualizadorMidiaProps) {
+  return (
+    <div>
+      <div
+        className="flex items-center justify-center gap-1 border-b border-slate-200 mb-4"
+        role="tablist"
+        aria-label="Mídia do projeto"
+      >
+        <TabButton
+          active={abaAtiva === "banner"}
+          onClick={() => onAbaChange("banner")}
+          icon={<ImageIcon size={15} />}
+          label="Banner"
+        />
+        <TabButton
+          active={abaAtiva === "video"}
+          onClick={() => onAbaChange("video")}
+          icon={<Play size={15} />}
+          label="Vídeo"
+        />
+      </div>
+
+      <AnimatePresence mode="wait">
+        {abaAtiva === "banner" ? (
+          <motion.div
+            key="banner"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+          >
+            <BannerFlip
+              bannerUrl={bannerUrl}
+              titulo={titulo}
+              onExpandir={onExpandir}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="video"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+          >
+            <VideoProjeto videoUrl={videoUrl} titulo={titulo} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function VideoProjeto({
+  videoUrl,
+  titulo,
+}: {
+  videoUrl: string | false | null;
+  titulo: string;
+}) {
+  const url = typeof videoUrl === "string" ? videoUrl.trim() : "";
+  const youtubeEmbedUrl = getYoutubeEmbedUrl(url);
+
+  return (
+    <div
+      className={`w-full max-w-[440px] mx-auto rounded-xl overflow-hidden border-2 border-sectec-900 shadow-lg ${
+        url ? "bg-slate-950" : "bg-sectec-50"
+      }`}
+      style={{ aspectRatio: "16 / 9" }}
+    >
+      {!url ? (
+        <div className="w-full h-full bg-sectec-50 flex flex-col items-center justify-center gap-3 text-sectec-400 px-6 text-center">
+          <span className="w-12 h-12 rounded-full bg-white border border-sectec-200 text-sectec-500 shadow-sm flex items-center justify-center">
+            <Play size={24} />
+          </span>
+          <span className="text-xs font-medium">Sem vídeo cadastrado</span>
+        </div>
+      ) : youtubeEmbedUrl ? (
+        <iframe
+          src={youtubeEmbedUrl}
+          title={`Vídeo do projeto ${titulo}`}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : (
+        <video
+          src={url}
+          title={`Vídeo do projeto ${titulo}`}
+          className="w-full h-full object-contain"
+          controls
+          preload="metadata"
+        />
+      )}
+    </div>
+  );
+}
+
+function getYoutubeEmbedUrl(url: string) {
+  if (!url) return null;
+
+  try {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname.replace(/^www\./, "");
+    let videoId = "";
+
+    if (hostname === "youtu.be") {
+      videoId = parsedUrl.pathname.split("/").filter(Boolean)[0] ?? "";
+    } else if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+      videoId =
+        parsedUrl.searchParams.get("v") ??
+        parsedUrl.pathname.match(/^\/(?:embed|shorts)\/([^/?]+)/)?.[1] ??
+        "";
+    }
+
+    return videoId
+      ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 /* ---------- Botão de aba ---------- */
@@ -215,6 +308,9 @@ function TabButton({
   return (
     <button
       onClick={onClick}
+      type="button"
+      role="tab"
+      aria-selected={active}
       className={`relative flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold transition-colors ${
         active ? "text-sectec-700" : "text-slate-400 hover:text-slate-600"
       }`}

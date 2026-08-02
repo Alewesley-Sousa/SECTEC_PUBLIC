@@ -20,3 +20,63 @@
 body {
   font-family: "Poppins", sans-serif;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sectec-600) var(--sectec-50);
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--sectec-50);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    var(--sectec-500),
+    var(--sectec-700)
+  );
+  border: 2px solid var(--sectec-50);
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--sectec-700);
+}
+
+.sobre-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sectec-600) var(--sectec-50);
+}
+
+.sobre-scroll::-webkit-scrollbar {
+  width: 9px;
+}
+
+.sobre-scroll::-webkit-scrollbar-track {
+  background: var(--sectec-50);
+}
+
+.sobre-scroll::-webkit-scrollbar-thumb {
+  background: var(--sectec-600);
+  border: 2px solid var(--sectec-50);
+  border-radius: 999px;
+}
+
+@media (min-width: 768px) {
+  html {
+    scrollbar-width: auto;
+  }
+
+  html::-webkit-scrollbar {
+    width: 12px;
+  }
+}

@@ -6,21 +6,78 @@ import imagemEstudo from "../assets/study.jpg";
 import imagemPoster from "../assets/post.jpg";
 import { TiltCard } from "../components/TiltCard";
 
+export interface OpcaoFiltro {
+  value: string;
+  label: string;
+}
+
 interface HeroProps {
   busca: string;
   onBuscaChange: (valor: string) => void;
   curso: string;
   onCursoChange: (valor: string) => void;
+  evento: string;
+  onEventoChange: (valor: string) => void;
+  eixo: string;
+  onEixoChange: (valor: string) => void;
+  opcoesEvento?: OpcaoFiltro[];
+  opcoesEixo?: OpcaoFiltro[];
+  sobreAberto: boolean;
+  onSobreClick: () => void;
 }
 
-export function Hero({ busca, onBuscaChange, curso, onCursoChange }: HeroProps) {
+const OPCOES_CURSO: OpcaoFiltro[] = [
+  { value: "", label: "Todos os cursos" },
+  { value: "informatica", label: "Informática" },
+  { value: "enfermagem", label: "Enfermagem" },
+  { value: "contabilidade", label: "Contabilidade" },
+];
+
+const OPCOES_EVENTO_PADRAO: OpcaoFiltro[] = [
+  { value: "", label: "Todos os eventos" },
+  { value: "2026", label: "2026" },
+];
+
+const OPCOES_EIXO_PADRAO: OpcaoFiltro[] = [
+  { value: "", label: "Todos os eixos temáticos" },
+];
+
+export function Hero({
+  busca,
+  onBuscaChange,
+  curso,
+  onCursoChange,
+  evento,
+  onEventoChange,
+  eixo,
+  onEixoChange,
+  opcoesEvento = OPCOES_EVENTO_PADRAO,
+  opcoesEixo = OPCOES_EIXO_PADRAO,
+  sobreAberto,
+  onSobreClick,
+}: HeroProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [secaoAtiva, setSecaoAtiva] = useState<"inicio" | "projetos">("inicio");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 12);
+
+      const projetos = document.getElementById("projetos");
+      setSecaoAtiva(
+        projetos && projetos.getBoundingClientRect().top <= 160
+          ? "projetos"
+          : "inicio"
+      );
+    };
+
+    const frame = window.requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -31,7 +88,7 @@ export function Hero({ busca, onBuscaChange, curso, onCursoChange }: HeroProps) 
   }, [menuOpen]);
 
   return (
-    <section className="bg-white">
+    <section id="inicio" className="bg-white scroll-mt-24">
       {/* Navbar */}
       <header
         className={`sticky top-0 z-40 px-4 sm:px-6 py-3 sm:py-4 transition-all duration-300 ${
@@ -44,11 +101,22 @@ export function Hero({ busca, onBuscaChange, curso, onCursoChange }: HeroProps) 
           <SectecLogo className="h-10 w-auto sm:h-12 md:h-[52px]" />
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
-            <NavLink href="#" active>
+            <NavLink href="#inicio" active={secaoAtiva === "inicio"}>
               Início
             </NavLink>
-            <NavLink href="#projetos">Projetos</NavLink>
-            <NavLink href="#sobre">Sobre</NavLink>
+            <NavLink href="#projetos" active={secaoAtiva === "projetos"}>
+              Projetos
+            </NavLink>
+            <NavLink
+              href="#sobre"
+              active={sobreAberto}
+              onClick={(event) => {
+                event.preventDefault();
+                onSobreClick();
+              }}
+            >
+              Sobre
+            </NavLink>
           </nav>
 
           <button
@@ -93,21 +161,35 @@ export function Hero({ busca, onBuscaChange, curso, onCursoChange }: HeroProps) 
 
               <div className="flex flex-col px-5 py-4 text-[15px] font-medium text-slate-700">
                 <a
-                  href="#"
+                  href="#inicio"
                   onClick={() => setMenuOpen(false)}
-                  className="py-3.5 border-b border-slate-50 text-sectec-600"
+                  className={`py-3.5 px-2 rounded-lg border-b border-slate-50 transition-colors hover:bg-sectec-50 hover:text-sectec-700 ${
+                    secaoAtiva === "inicio" ? "text-sectec-600" : ""
+                  }`}
                 >
                   Início
                 </a>
                 <a
                   href="#projetos"
                   onClick={() => setMenuOpen(false)}
-                  className="py-3.5 border-b border-slate-50"
+                  className={`py-3.5 px-2 rounded-lg border-b border-slate-50 transition-colors hover:bg-sectec-50 hover:text-sectec-700 ${
+                    secaoAtiva === "projetos" ? "text-sectec-600" : ""
+                  }`}
                 >
                   Projetos
                 </a>
-                <a href="#sobre" onClick={() => setMenuOpen(false)} className="py-3.5">
-                  Sobre o SECTEC
+                <a
+                  href="#sobre"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setMenuOpen(false);
+                    onSobreClick();
+                  }}
+                  className={`py-3.5 px-2 rounded-lg transition-colors hover:bg-sectec-50 hover:text-sectec-700 ${
+                    sobreAberto ? "text-sectec-600" : ""
+                  }`}
+                >
+                  Sobre
                 </a>
               </div>
             </motion.nav>
@@ -228,10 +310,25 @@ export function Hero({ busca, onBuscaChange, curso, onCursoChange }: HeroProps) 
         transition={{ duration: 0.5, delay: 0.3 }}
         className="max-w-6xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-14 relative z-10"
       >
-        <div className="bg-white rounded-xl shadow-[0_20px_45px_-15px_rgba(34,197,94,0.35)] hover:shadow-[0_25px_55px_-15px_rgba(34,197,94,0.45)] transition-shadow duration-300 border border-slate-200 p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          <FiltroSelect label="Evento" placeholder="Todos os eventos" />
-          <FiltroCurso value={curso} onChange={onCursoChange} />
-          <FiltroSelect label="Eixo temático" placeholder="Todos os eixos temáticos" />
+        <div className="bg-white rounded-xl shadow-[0_20px_45px_-15px_rgba(34,197,94,0.35)] hover:shadow-[0_25px_55px_-15px_rgba(34,197,94,0.45)] transition-shadow duration-300 border border-slate-200 p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[0.9fr_0.9fr_0.9fr_1.3fr] gap-3 sm:gap-4">
+          <FiltroGenerico
+            label="Evento"
+            value={evento}
+            onChange={onEventoChange}
+            opcoes={opcoesEvento}
+          />
+          <FiltroGenerico
+            label="Curso"
+            value={curso}
+            onChange={onCursoChange}
+            opcoes={OPCOES_CURSO}
+          />
+          <FiltroGenerico
+            label="Eixo temático"
+            value={eixo}
+            onChange={onEixoChange}
+            opcoes={opcoesEixo}
+          />
           <FiltroBusca value={busca} onChange={onBuscaChange} />
         </div>
       </motion.div>
@@ -243,25 +340,32 @@ function NavLink({
   href,
   children,
   active = false,
+  onClick,
 }: {
   href: string;
   children: React.ReactNode;
   active?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
   return (
-    <a href={href} className="relative py-1 group">
+    <a
+      href={href}
+      onClick={onClick}
+      className="relative px-2 py-2 rounded-md group transition-colors hover:bg-sectec-50"
+      aria-current={active ? "page" : undefined}
+    >
       <span
-        className={
+        className={`transition-colors group-hover:text-sectec-700 ${
           active
             ? "text-sectec-600"
-            : "text-slate-700 group-hover:text-sectec-600 transition-colors"
-        }
+            : "text-slate-700"
+        }`}
       >
         {children}
       </span>
       <span
-        className={`absolute left-0 -bottom-0.5 h-0.5 bg-sectec-600 transition-all duration-300 ${
-          active ? "w-full" : "w-0 group-hover:w-full"
+        className={`absolute left-2 right-2 bottom-0 h-0.5 bg-sectec-600 rounded-full origin-left transition-transform duration-300 ${
+          active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
         }`}
       />
     </a>
@@ -280,40 +384,26 @@ function StatBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-function FiltroSelect({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-slate-500 mb-1.5">{label}</label>
-      <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-sectec-600 focus:ring-2 focus:ring-sectec-100 transition-all">
-        <option>{placeholder}</option>
-      </select>
-    </div>
-  );
-}
-{/* nao funcional*/}
-const OPCOES_CURSO = [
-  { value: "", label: "Todos os cursos" },
-  { value: "informatica", label: "Informática" },
-  { value: "enfermagem", label: "Enfermagem" },
-  { value: "contabilidade", label: "Contabilidade" },
-];
-
-function FiltroCurso({
+function FiltroGenerico({
+  label,
   value,
   onChange,
+  opcoes,
 }: {
+  label: string;
   value: string;
   onChange: (valor: string) => void;
+  opcoes: OpcaoFiltro[];
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-500 mb-1.5">Curso</label>
+      <label className="block text-xs font-medium text-slate-500 mb-1.5">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-sectec-600 focus:ring-2 focus:ring-sectec-100 transition-all"
       >
-        {OPCOES_CURSO.map((opcao) => (
+        {opcoes.map((opcao) => (
           <option key={opcao.value} value={opcao.value}>
             {opcao.label}
           </option>
@@ -331,7 +421,7 @@ function FiltroBusca({
   onChange: (valor: string) => void;
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label className="block text-xs font-medium text-slate-500 mb-1.5">
         Buscar por projeto ou aluno
       </label>

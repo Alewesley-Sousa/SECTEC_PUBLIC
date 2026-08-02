@@ -48,7 +48,9 @@ export function useProjetosPublicos(
       .catch((err) => {
         if (currentRequest !== requestId.current) return;
         setError(
-          err instanceof ApiError
+          err instanceof ApiError && err.status === 500 && filtros.curso
+            ? "O servidor não conseguiu filtrar por curso."
+            : err instanceof ApiError
             ? err.message
             : "Não foi possível carregar os projetos."
         );

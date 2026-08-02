@@ -1,17 +1,14 @@
-// src/api/projetosPublicos.ts
-import { apiRequest } from "../lib/api"; // ajusta o caminho pro seu arquivo de client existente
-
-export type PapelEquipe = "autor" | "integrante";
-
-export interface MembroEquipe {
-  id: number;
-  nome: string;
-  role: PapelEquipe;
-}
+import { apiRequest } from "../lib/api";
 
 export interface TemaResumo {
   id: number;
   nome: string;
+}
+
+export interface MembroEquipe {
+  id: number;
+  nome: string;
+  role: string;
 }
 
 export interface ProjetoPublico {
@@ -20,7 +17,7 @@ export interface ProjetoPublico {
   descricao: string;
   tema: TemaResumo;
   equipe: MembroEquipe[];
-  video: string | null;
+  video: string | false | null;
   hasBanner: boolean;
 }
 
@@ -40,33 +37,38 @@ export interface ProjetosPublicosFiltros {
   search?: string;
   curso?: string;
   eixo?: string;
-  evento?: string | number;
+  evento?: string;
   page?: number;
   limit?: number;
 }
 
-const DEFAULT_LIMIT = 8;
-
-function buildQuery(filtros: ProjetosPublicosFiltros): string {
+function montarQueryString(filtros: ProjetosPublicosFiltros) {
   const params = new URLSearchParams();
 
   if (filtros.search?.trim()) params.set("search", filtros.search.trim());
   if (filtros.curso) params.set("curso", filtros.curso);
   if (filtros.eixo) params.set("eixo", filtros.eixo);
-  if (filtros.evento !== undefined && filtros.evento !== "") {
-    params.set("evento", String(filtros.evento));
-  }
+  if (filtros.evento) params.set("evento", filtros.evento);
+  if (filtros.page) params.set("page", String(filtros.page));
+  if (filtros.limit) params.set("limit", String(filtros.limit));
 
-  params.set("page", String(filtros.page ?? 1));
-  params.set("limit", String(filtros.limit ?? DEFAULT_LIMIT));
-
-  return params.toString();
+  const query = params.toString();
+  return query ? `?${query}` : "";
 }
 
-export async function getProjetosPublicos(
-  filtros: ProjetosPublicosFiltros = {}
-): Promise<ProjetosPublicosResponse> {
-  const query = buildQuery(filtros);
-  return apiRequest<ProjetosPublicosResponse>(`/projetos/public?${query}`, {
-  });
+export function getProjetosPublicos(filtros: ProjetosPublicosFiltros = {}) {
+  return apiRequest<ProjetosPublicosResponse>(
+    `/projetos/public${montarQueryString(filtros)}`
+  );
+}
+
+export async function getEixosTematicosPublicos() {
+  const response = await getProjetosPublicos({ page: 1, limit: 100 });
+  const temasPorId = new Map(
+    response.data.map((projeto) => [projeto.tema.id, projeto.tema])
+  );
+
+  return Array.from(temasPorId.values()).sort((a, b) =>
+    a.nome.localeCompare(b.nome, "pt-BR")
+  );
 }

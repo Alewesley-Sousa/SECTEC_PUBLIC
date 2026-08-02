@@ -32,7 +32,7 @@ export function TiltCard({ children, className, idleDelay = 0 }: TiltCardProps) 
   }
 
   return (
-    <div style={{ perspective: 800 }}>
+    <div className="w-full h-full" style={{ perspective: 800 }}>
       <motion.div
         ref={ref}
         onMouseEnter={() => setHovering(true)}
