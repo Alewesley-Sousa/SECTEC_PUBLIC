@@ -1,0 +1,24 @@
+# Ignorar arquivos do sistema
+.cache/
+.config/
+.local/
+.snap/
+.DS_Store
+*.log
+
+# Ignorar pastas de navegadores
+**/.config/BraveSoftware/
+**/.config/google-chrome/
+**/.config/chromium/
+**/.mozilla/
+
+# Ignorar node_modules e arquivos do projeto
+node_modules/
+.env
+.env.local
+.env.production
+dist/
+build/
+
+# Ignorar arquivos ocultos do sistema
+.[!.]*
