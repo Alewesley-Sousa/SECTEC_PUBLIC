@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "start": "serve dist -s -n -L -p $PORT",
+    "start": "serve dist -s -n -L -p 3000",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -16,6 +16,7 @@
     "lucide-react": "^1.28.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "serve": "^14.2.6",
     "tailwindcss": "^4.3.2"
   },
   "devDependencies": {
