@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProjetoCard } from "./ProjetoCard";
 import { ProjetoModal } from "./ProjetoModal";
 import type {
@@ -15,6 +15,7 @@ interface ProjetosGridProps {
   error: string | null;
   page: number;
   onPageChange: (pagina: number) => void;
+  initialProjectId?: number | null; // ✅ nova prop
 }
 
 export function ProjetosGrid({
@@ -24,12 +25,23 @@ export function ProjetosGrid({
   error,
   page,
   onPageChange,
+  initialProjectId,
 }: ProjetosGridProps) {
   const [projetoSelecionado, setProjetoSelecionado] =
     useState<ProjetoPublico | null>(null);
 
   const totalPaginas = meta?.totalPages ?? 1;
   const totalProjetos = meta?.total ?? 0;
+
+  // ✅ Efeito para abrir o modal automaticamente quando initialProjectId mudar
+  useEffect(() => {
+    if (initialProjectId && projetos.length > 0) {
+      const projetoAlvo = projetos.find((p) => p.id === initialProjectId);
+      if (projetoAlvo) {
+        setProjetoSelecionado(projetoAlvo);
+      }
+    }
+  }, [initialProjectId, projetos]);
 
   function irParaPagina(pagina: number) {
     onPageChange(pagina);
@@ -110,11 +122,10 @@ export function ProjetosGrid({
               <button
                 key={pagina}
                 onClick={() => irParaPagina(pagina)}
-                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
-                  pagina === page
+                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-medium transition-colors ${pagina === page
                     ? "bg-sectec-600 text-white"
                     : "text-slate-600 hover:bg-sectec-50 hover:text-sectec-600"
-                }`}
+                  }`}
               >
                 {pagina}
               </button>

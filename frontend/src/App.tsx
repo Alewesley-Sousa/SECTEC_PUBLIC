@@ -23,6 +23,9 @@ function App() {
     OPCAO_TODOS_EIXOS,
   ]);
 
+  // ✅ Novo estado para o ID do projeto vindo da URL
+  const [initialProjectId, setInitialProjectId] = useState<number | null>(null);
+
   const debouncedSearch = useDebouncedValue(searchInput);
 
   const { projetos, meta, loading, error, filtros, setFiltros, setPage } =
@@ -57,6 +60,16 @@ function App() {
     };
   }, []);
 
+  // ✅ Detecta o ID do projeto na URL e guarda no estado
+  useEffect(() => {
+    const path = window.location.pathname; // ex: /projeto/42
+    const match = path.match(/\/projeto\/(\d+)/);
+
+    if (match && match[1]) {
+      setInitialProjectId(Number(match[1]));
+    }
+  }, []);
+
   return (
     <main>
       <Hero
@@ -79,6 +92,8 @@ function App() {
         error={error}
         page={filtros.page ?? 1}
         onPageChange={setPage}
+        // ✅ Passa o ID inicial para abrir o modal
+        initialProjectId={initialProjectId}
       />
       <Footer onSobreClick={() => setSobreAberto(true)} />
       <Sobre aberto={sobreAberto} onClose={() => setSobreAberto(false)} />

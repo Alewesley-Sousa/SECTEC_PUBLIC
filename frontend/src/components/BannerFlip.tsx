@@ -1,33 +1,27 @@
 import { ImageOff, Maximize2 } from "lucide-react";
-import { TiltCard } from "./TiltCard";
 
 interface BannerFlipProps {
   bannerUrl?: string;
   titulo: string;
-  onExpandir: () => void;
+  onExpandir?: () => void; // pode ser ignorado
 }
 
-export function BannerFlip({ bannerUrl, titulo, onExpandir }: BannerFlipProps) {
+export function BannerFlip({ bannerUrl, titulo }: BannerFlipProps) {
   const temBanner = Boolean(bannerUrl);
 
   return (
     <div className="flex flex-col gap-3 w-full">
       <div
-        className="w-full max-w-[220px] sm:max-w-[260px] mx-auto"
+        className="w-full max-w-[260px] sm:max-w-[300px] mx-auto"
         style={{ aspectRatio: "3 / 4" }}
       >
-        <TiltCard
-          idleDelay={0}
-          className={`w-full h-full rounded-xl border-2 border-sectec-900 overflow-hidden bg-sectec-50 shadow-lg ${
-            temBanner ? "cursor-pointer" : "cursor-default"
-          }`}
-        >
+        <div className="w-full h-full rounded-xl border-2 border-sectec-900 overflow-hidden bg-sectec-50 shadow-lg">
           {temBanner ? (
-            <img
+            <iframe
               src={bannerUrl}
-              alt={`Banner do projeto ${titulo}`}
-              className="w-full h-full object-cover"
-              onClick={onExpandir}
+              title={`Banner do projeto ${titulo}`}
+              className="w-full h-full"
+              allowFullScreen
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-sectec-300">
@@ -37,12 +31,16 @@ export function BannerFlip({ bannerUrl, titulo, onExpandir }: BannerFlipProps) {
               </span>
             </div>
           )}
-        </TiltCard>
+        </div>
       </div>
 
-      <div className="max-w-[220px] sm:max-w-[260px] mx-auto w-full">
+      <div className="max-w-[260px] sm:max-w-[300px] mx-auto w-full">
         <button
-          onClick={onExpandir}
+          onClick={() => {
+            if (temBanner && bannerUrl) {
+              window.open(bannerUrl, "_blank", "noopener,noreferrer");
+            }
+          }}
           disabled={!temBanner}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-sectec-600 text-white text-xs font-medium hover:bg-sectec-700 active:bg-sectec-800 disabled:opacity-40 disabled:hover:bg-sectec-600 disabled:cursor-not-allowed transition-colors"
         >
