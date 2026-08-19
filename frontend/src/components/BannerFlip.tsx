@@ -17,11 +17,10 @@ export function BannerFlip({ bannerUrl, titulo }: BannerFlipProps) {
       >
         <div className="w-full h-full rounded-xl border-2 border-sectec-900 overflow-hidden bg-sectec-50 shadow-lg">
           {temBanner ? (
-            <iframe
+            <embed
               src={bannerUrl}
-              title={`Banner do projeto ${titulo}`}
+              type="application/pdf"
               className="w-full h-full"
-              allowFullScreen
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-sectec-300">
