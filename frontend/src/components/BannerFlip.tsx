@@ -1,9 +1,10 @@
 import { ImageOff, Maximize2 } from "lucide-react";
+import { TiltCard } from "./TiltCard";
 
 interface BannerFlipProps {
   bannerUrl?: string;
   titulo: string;
-  onExpandir?: () => void; // pode ser ignorado
+  onExpandir?: () => void; // opcional, não será mais usado para abrir lightbox
 }
 
 export function BannerFlip({ bannerUrl, titulo }: BannerFlipProps) {
@@ -12,15 +13,20 @@ export function BannerFlip({ bannerUrl, titulo }: BannerFlipProps) {
   return (
     <div className="flex flex-col gap-3 w-full">
       <div
-        className="w-full max-w-[260px] sm:max-w-[300px] mx-auto"
-        style={{ aspectRatio: "3 / 4" }}
+        className="w-full max-w-[220px] sm:max-w-[260px] mx-auto"
+        style={{ height: '350px' }}
       >
-        <div className="w-full h-full rounded-xl border-2 border-sectec-900 overflow-hidden bg-sectec-50 shadow-lg">
+        <TiltCard
+          idleDelay={0}
+          className={`w-full h-full rounded-xl border-2 border-sectec-900 overflow-hidden bg-sectec-50 shadow-lg ${temBanner ? "cursor-pointer" : "cursor-default"
+            }`}
+        >
           {temBanner ? (
-            <embed
-              src={bannerUrl}
-              type="application/pdf"
-              className="w-full h-full"
+            <iframe
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(bannerUrl)}&embedded=true`}
+              title={`Banner do projeto ${titulo}`}
+              className="w-full h-full border-0"
+              allowFullScreen
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-sectec-300">
@@ -30,10 +36,10 @@ export function BannerFlip({ bannerUrl, titulo }: BannerFlipProps) {
               </span>
             </div>
           )}
-        </div>
+        </TiltCard>
       </div>
 
-      <div className="max-w-[260px] sm:max-w-[300px] mx-auto w-full">
+      <div className="max-w-[220px] sm:max-w-[260px] mx-auto w-full">
         <button
           onClick={() => {
             if (temBanner && bannerUrl) {
